@@ -46,6 +46,14 @@ mic ─► MediaTek HAL ─► Aurisys VoIP uplink ─► [ lib_speech_enh (Medi
 
 Mic gains are patched in MediaTek's `SpeechVol_AudioParam.xml` (SIM calls) and `VoIPVol_AudioParam.xml` (internet calls). All patched files are overlaid systemlessly by Magisk from the module folder.
 
+## Requirements
+
+- **Root with Magisk** (and therefore an unlocked bootloader). This is not optional: MicClean works by replacing vendor audio config files and loading a plugin into the MediaTek audio HAL process. Android doesn't let a normal app, or even Shizuku/ADB-level access, change `/vendor` or touch another app's mic audio.
+- A **MediaTek** phone whose audio HAL uses Aurisys with `lib_speech_enh.so` for VoIP. It was built on a Tecno KI7 (mt6768); other models are untested.
+- The control app needs Android 12+ (dynamic colors).
+
+**No root?** No app can denoise your mic for other apps on stock Android. Your best option is the call app's own filter, for example Discord → Voice → Noise Suppression (Krisp), or Google Meet's noise cancellation.
+
 ## Install
 
 1. Download `MicClean-v1.3.zip` and `MicClean-app.apk` from [Releases](../../releases).
