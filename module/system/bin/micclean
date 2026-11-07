@@ -1,0 +1,51 @@
+#!/system/bin/sh
+# MicClean control tool.  Run as root:  su -c micclean <command>
+[ "$(id -u)" = 0 ] || { echo "Needs root: su -c micclean $*"; exit 1; }
+if [ -z "$MICCLEAN_BB" ] && [ -x /data/adb/magisk/busybox ]; then
+  export MICCLEAN_BB=1 ASH_STANDALONE=1
+  exec /data/adb/magisk/busybox sh "$0" "$@"
+fi
+MD=/data/adb/modules/micclean
+CFG=/data/adb/micclean/config
+
+restart_audio() {
+  echo "Restarting audio services (any ongoing call or music will cut out for a second)..."
+  setprop ctl.restart vendor.audio-hal
+  sleep 1
+  setprop ctl.restart audioserver
+}
+
+ul() { grep -o 'ul_gain" value="[0-9]*"' "$1" 2>/dev/null | grep -o '[0-9]*' | tr '\n' ' '; }
+
+case "$1" in
+  status|"")
+    echo "== MicClean config ($CFG)"; grep -E '^[A-Z_]+=' "$CFG"
+    echo "== Call mic gains in use (dB):  $(ul /vendor/etc/audio_param/SpeechVol_AudioParam.xml)"
+    echo "   stock:                        $(ul $MD/orig/SpeechVol_AudioParam.xml)"
+    echo "== VoIP mic gains in use (dB):  $(ul /vendor/etc/audio_param/VoIPVol_AudioParam.xml)"
+    echo "   stock:                        $(ul $MD/orig/VoIPVol_AudioParam.xml)"
+    echo "== Dual-mic noise reduction for SIM calls: $(grep -o 'MTK_DUAL_MIC_SUPPORT" value="[a-z]*' /vendor/etc/audio_param/AudioParamOptions.xml | sed 's/.*value="//')"
+    echo "== VoIP effect chain in use:"
+    awk '/<stream .*voice_communication/{f=1} f&&/apply/{print "   " $0} /<\/stream>/{f=0}' /vendor/etc/audio_effects.xml | sed 's/<!--micclean-->//'
+    ;;
+  set)
+    [ -n "$2" ] && [ -n "$3" ] || { echo "usage: micclean set NAME VALUE   e.g. micclean set CALL_MIC_OFFSET -8"; exit 1; }
+    grep -q "^$2=" "$CFG" || { echo "unknown setting $2"; exit 1; }
+    case "$3" in -[0-9]*|[0-9]*) ;; *) echo "value must be a number"; exit 1;; esac
+    sed -i "s/^$2=[^ #]*/$2=$3/" "$CFG"
+    sh "$MD/build.sh" "$MD" "$CFG" && restart_audio
+    ;;
+  apply)
+    sh "$MD/build.sh" "$MD" "$CFG" && restart_audio
+    ;;
+  reset)
+    cp -f "$MD/config.default" "$CFG"
+    sh "$MD/build.sh" "$MD" "$CFG" && restart_audio
+    ;;
+  *)
+    echo "micclean status            show settings and active gains"
+    echo "micclean set NAME VALUE    change a setting and apply it now"
+    echo "micclean apply             re-apply after editing $CFG by hand"
+    echo "micclean reset             back to MicClean defaults"
+    ;;
+esac

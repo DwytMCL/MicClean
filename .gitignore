@@ -1,0 +1,13 @@
+# build outputs
+dist/
+module/system/vendor/lib/
+module/system/vendor/lib64/
+native/rnnoise-0.2/
+app/.gradle/
+app/build/
+app/app/build/
+app/local.properties
+*.apk
+*.keystore
+*.jks
+.idea/

@@ -1,0 +1,6 @@
+id=micclean
+name=MicClean - call noise suppression
+version=v1.3
+versionCode=4
+author=Dwight
+description=Lower call mic gain, RNNoise AI noise suppression for internet calls, echo cancel and a limiter on the voice-call mic path, with adjustable mic gain. Config: /data/adb/micclean/config, tool: su -c micclean

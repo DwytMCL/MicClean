@@ -1,0 +1,24 @@
+# MicClean settings.  Change with:  su -c micclean set NAME VALUE
+# (or edit this file, then run:  su -c micclean apply)
+
+# ---- Regular phone calls (MediaTek modem speech path, has its own built-in noise reduction) ----
+# Mic gain change in dB for every call profile. Negative = you sound quieter. Stock = 0.
+CALL_MIC_OFFSET=-6
+# Extra change for speakerphone calls only (added on top of CALL_MIC_OFFSET).
+CALL_SPK_OFFSET=0
+
+# ---- Internet calls: WhatsApp, Messenger, Telegram, Meet (VOICE_COMMUNICATION mic) ----
+# Mic gain change in dB. Stock VoIP mic gain on this phone is high (25-34 dB).
+VOIP_MIC_OFFSET=-6
+# 1 = on, 0 = off
+VOIP_AEC=1        # echo cancellation (stock: on)
+VOIP_NS=0         # MediaTek noise suppression (stock: on; off by default since RNNoise replaces it)
+VOIP_RNNOISE=1    # AI noise suppression (RNNoise 0.2, Krisp-style, ~6% of one CPU core during calls)
+VOIP_RNNOISE_STRENGTH=2  # 0 = AI only, 1 = gentle, 2 = normal, 3 = aggressive voice gate (mutes keys/taps between words)
+VOIP_AGC=0        # auto gain, boosts your voice and background noise (stock: on)
+VOIP_LIMITER=1    # AOSP AGC2 limiter, stops loud peaks (stock: not used)
+
+# ---- Experimental ----
+# MediaTek dual-mic noise reduction on SIM calls (uses the second mic to cancel room noise).
+# Tecno ships it off. Try it, and set back to 0 if callers say you sound worse.
+CALL_DUALMIC=0
